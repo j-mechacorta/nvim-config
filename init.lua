@@ -34,6 +34,12 @@ require('packer').startup(function(use)
     'marko-cerovac/material.nvim'
   }
 
+  use {
+    'akinsho/bufferline.nvim',
+    tag = "v3.3.0", 
+    requires = 'nvim-tree/nvim-web-devicons'
+  }
+
   use { -- tree explorer
     'nvim-tree/nvim-tree.lua',
     requires = 'nvim-tree/nvim-web-devicons'
@@ -145,13 +151,14 @@ vim.wo.signcolumn = 'yes'
 
 -- Set colorscheme
 
+vim.g.material_style = "deep ocean"
+vim.cmd [[colorscheme material ]]
 -- nightfly background opacity
 vim.g.nightflyTransparent = true
 
 -- color cursor
 vim.g.moonflyCursorColor = true
 vim.o.termguicolors = true
-vim.cmd [[colorscheme material ]]
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -187,12 +194,145 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- Set lualine as statusline
 -- See `:help lualine.txt`
+--
+
+require('material').setup({
+
+    contrast = {
+        terminal = false, -- Enable contrast for the built-in terminal
+        sidebars = false, -- Enable contrast for sidebar-like windows ( for example Nvim-Tree )
+        floating_windows = false, -- Enable contrast for floating windows
+        cursor_line = false, -- Enable darker background for the cursor line
+        non_current_windows = false, -- Enable darker background for non-current windows
+        filetypes = {}, -- Specify which filetypes get the contrasted (darker) background
+    },
+
+    styles = { -- Give comments style such as bold, italic, underline etc.
+        comments = { --[[ italic = true ]] },
+        strings = { --[[ bold = true ]] },
+        keywords = { --[[ underline = true ]] },
+        functions = { --[[ bold = true, undercurl = true ]] },
+        variables = {},
+        operators = {},
+        types = {},
+    },
+
+    plugins = { -- Uncomment the plugins that you use to highlight them
+        -- Available plugins:
+        -- "dap",
+        -- "dashboard",
+        "gitsigns",
+        -- "hop",
+        -- "indent-blankline",
+        -- "lspsaga",
+        -- "mini",
+        -- "neogit",
+        "nvim-cmp",
+        -- "nvim-navic",
+        "nvim-tree",
+        "nvim-web-devicons",
+        -- "sneak",
+        "telescope",
+        -- "trouble",
+        -- "which-key",
+    },
+
+    disable = {
+        colored_cursor = false, -- Disable the colored cursor
+        borders = false, -- Disable borders between verticaly split windows
+        background = false, -- Prevent the theme from setting the background (NeoVim then uses your terminal background)
+        term_colors = false, -- Prevent the theme from setting terminal colors
+        eob_lines = false -- Hide the end-of-buffer lines
+    },
+
+    high_visibility = {
+        lighter = false, -- Enable higher contrast text for lighter style
+        darker = false -- Enable higher contrast text for darker style
+    },
+
+    lualine_style = "default", -- Lualine style ( can be 'stealth' or 'default' )
+
+    async_loading = true, -- Load parts of the theme asyncronously for faster startup (turned on by default)
+
+    custom_colors = nil, -- If you want to everride the default colors, set this to a function
+
+    custom_highlights = {}, -- Overwrite highlights with your own
+})
+
+local colors = {
+  blue   = '#80a0ff',
+  cyan   = '#79dac8',
+  black  = '#080808',
+  white  = '#c6c6c6',
+  red    = '#ff5189',
+  violet = '#d183e8',
+  grey   = '#303030',
+}
+
+local bubbles_theme = {
+  normal = {
+    a = { fg = colors.black, bg = colors.violet },
+    b = { fg = colors.white, bg = colors.black },
+    c = { fg = colors.white, bg = colors.grey },
+  },
+
+  insert = { a = { fg = colors.black, bg = colors.blue } },
+  visual = { a = { fg = colors.black, bg = colors.cyan } },
+  replace = { a = { fg = colors.black, bg = colors.red } },
+  command = { a = { fg = colors.black, bg = colors.violet } },
+
+  inactive = {
+    a = { fg = colors.white, bg = colors.black },
+    b = { fg = colors.white, bg = colors.black },
+    c = { fg = colors.white, bg = colors.black },
+  },
+}
+
+local lualine_a = {
+      'diff',
+      colored = true, -- Displays a colored diff status if set to true
+      diff_color = {
+        -- Same color values as the general color option can be used here.
+        added    = 'DiffAdd',    -- Changes the diff's added color
+        modified = 'DiffChange', -- Changes the diff's modified color
+        removed  = 'DiffDelete', -- Changes the diff's removed color you
+      },
+      symbols = {added = '+', modified = '~', removed = '-'}, -- Changes the symbols used by the diff.
+      source = {added = 1, modified = 2, removed = 2 }, -- A function that works as a data source for diff.
+                    -- It must return a table as such:
+                    --   { added = add_count, modified = modified_count, removed = removed_count }
+                    -- or nil on failure. count <= 0 won't be displayed.
+    }
+
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme = 'material',
+    theme = bubbles_theme,-- 'material',
     component_separators = '|',
-    section_separators = '',
+    section_separators = { left = '', right = '' },
+    sections = {
+      lualine_a = {
+        { 'mode', separator = { left = '' }, right_padding = 2 },
+      },
+      lualine_b = { 'branch', 'diff', 'diagnostics' },
+      lualine_c = {{ 'filename', path = 3 }},
+      lualine_x = { 'encoding', 'fileformat', 'filetype'},
+      lualine_y = { 'searchcount' ,'filesize' ,'progress' },
+      lualine_z = {
+        { 'location', separator = { right = '' }, left_padding = 2 },
+      },
+    },
+    inactive_sections = {
+    lualine_a = { 'filename' },
+    lualine_b = {},
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = {},
+    lualine_z = { 'location' },
+  },
+  tabline = {},
+  extensions = {},
+    --section_separators = '',
   },
 }
 
@@ -418,6 +558,125 @@ local servers = {
       telemetry = { enable = false },
     },
   },
+}
+
+
+-- Segup bufferline
+
+require("bufferline").setup{
+  options = {
+    mode = "buffers", -- set to "tabs" to only show tabpages instead
+    numbers =  "ordinal", --"none" | "ordinal" | "buffer_id" | "both" | function({ ordinal, id, lower, raise }): string,
+    close_command = "bdelete! %d",       -- can be a string | function, see "Mouse actions"
+    right_mouse_command = "bdelete! %d", -- can be a string | function, see "Mouse actions"
+    left_mouse_command = "buffer %d",    -- can be a string | function, see "Mouse actions"
+    middle_mouse_command = nil,          -- can be a string | function, see "Mouse actions"
+    indicator = {
+      icon = '▎', -- this should be omitted if indicator style is not 'icon'
+      style = 'icon' --'icon' | 'underline' | 'none',
+    },
+    buffer_close_icon = '',
+    modified_icon = '●',
+    close_icon = '',
+    left_trunc_marker = '',
+    right_trunc_marker = '',
+        --- name_formatter can be used to change the buffer's label in the bufferline.
+        --- Please note some names can/will break the
+        --- bufferline so use this at your discretion knowing that it has
+        --- some limitations that will *NOT* be fixed.
+    name_formatter = function(buf)  -- buf contains:
+              -- name                | str        | the basename of the active file
+              -- path                | str        | the full path of the active file
+              -- bufnr (buffer only) | int        | the number of the active buffer
+              -- buffers (tabs only) | table(int) | the numbers of the buffers in the tab
+              -- tabnr (tabs only)   | int        | the "handle" of the tab, can be converted to its ordinal number using: `vim.api.nvim_tabpage_get_number(buf.tabnr)`
+    end,
+    max_name_length = 18,
+    max_prefix_length = 15, -- prefix used when a buffer is de-duplicated
+    truncate_names = true, -- whether or not tab names should be truncated
+    tab_size = 18,
+    diagnostics = "nvim_lsp", -- false | "nvim_lsp" | "coc",
+    diagnostics_update_in_insert = false,
+        -- The diagnostics indicator can be set to nil to keep the buffer name highlight but delete the highlighting
+    diagnostics_indicator = function(count, level, diagnostics_dict, context)
+      return "("..count..")"
+    end,
+        -- NOTE: this will be called a lot so don't do any heavy processing here
+    custom_filter = function(buf_number, buf_numbers)
+            -- filter out filetypes you don't want to see
+      if vim.bo[buf_number].filetype ~= "<i-dont-want-to-see-this>" then
+        return true
+      end
+            -- filter out by buffer name
+      if vim.fn.bufname(buf_number) ~= "<buffer-name-I-dont-want>" then
+        return true
+      end
+            -- filter out based on arbitrary rules
+            -- e.g. filter out vim wiki buffer from tabline in your work repo
+      if vim.fn.getcwd() == "<work-repo>" and vim.bo[buf_number].filetype ~= "wiki" then
+        return true
+      end
+            -- filter out by it's index number in list (don't show first buffer)
+      if buf_numbers[1] ~= buf_number then
+        return true
+      end
+    end,
+    offsets = {
+      {
+        filetype = "NvimTree",
+        text = "Navigation", -- | function ,
+        text_align = 'left', --"left" | "center" | "right"
+        separator = true
+      }
+    },
+    color_icons = true, -- true | false, -- whether or not to add the filetype icon highlights
+    get_element_icon = function(element)
+      -- element consists of {filetype: string, path: string, extension: string, directory: string}
+      -- This can be used to change how bufferline fetches the icon
+      -- for an element e.g. a buffer or a tab.
+      -- e.g.
+        local icon, hl = require('nvim-web-devicons').get_icon_by_filetype(element.filetype, { default = false })
+        return icon, hl
+      -- or
+      -- local custom_map = {my_thing_ft: {icon = "my_thing_icon", hl}}
+      -- return custom_map[element.filetype]
+    end,
+    show_buffer_icons = true, --true | false, -- disable filetype icons for buffers
+    show_buffer_close_icons = true, -- true | false,
+    show_buffer_default_icon = true, -- true | false, -- whether or not an unrecognised filetype should show a default icon
+    show_close_icon = true, -- true | false,
+    show_tab_indicators = true, -- true | false,
+    show_duplicate_prefix = true, --true | false, -- whether to show duplicate buffer prefix
+    persist_buffer_sort = true, -- whether or not custom sorted buffers should persist
+    -- can also be a table containing 2 custom separators
+    -- [focused and unfocused]. eg: { '|', '|' }
+    separator_style = "slant", -- "slant" | "slope" | "thick" | "thin" | { 'any', 'any' },
+    enforce_regular_tabs = false, -- false | true,
+    always_show_bufferline = true, -- true | false,
+    hover = {
+        enabled = true,
+        delay = 200,
+        reveal = {'close'}
+    },
+    sort_by = 'insert_after_current',
+    -- 'insert_after_current' |'insert_at_end' | 'id' | 'extension' | 'relative_directory' | 'directory' | 'tabs' | function(buffer_a, buffer_b)
+        -- add custom logic
+        -- return buffer_a.modified > buffer_b.modified
+    --end
+    highlights = {
+      buffer_selected = {
+          fg = "#7EA9A7",
+          bg = '#000000',
+          bold = true,
+          italic = false,
+      },
+      diagnostic_selected = { italic = false },
+      hint_selected = { italic = false },
+      pick_selected = { italic = false },
+      pick_visible = { italic = false },
+      pick = { italic = true },
+    },
+  }
 }
 
 -- Setup neovim lua configuration
